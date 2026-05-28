@@ -48,4 +48,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
 # Apply pending migrations against the volume DB, then hand PID 1 to the server
 # (exec) so SIGTERM reaches the graceful-shutdown handler in index.ts.
 WORKDIR /app/apps/server
-CMD ["sh", "-c", "/app/node_modules/.bin/prisma migrate deploy && exec /app/node_modules/.bin/tsx src/index.ts"]
+CMD ["sh", "-c", "/app/node_modules/.bin/tsx src/db/ensure-sqlite.ts && /app/node_modules/.bin/prisma migrate deploy && exec /app/node_modules/.bin/tsx src/index.ts"]
