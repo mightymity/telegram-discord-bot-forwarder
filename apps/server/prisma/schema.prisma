@@ -1,0 +1,62 @@
+// SQLite + Prisma. Note: SQLite does not support DB enums, so `status` is a
+// String validated at the app layer against the ForwardStatus union.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Route {
+  id              String   @id @default(cuid())
+  name            String
+  tgSourceId      String
+  tgSourceTitle   String?
+  discordWebhook  String
+  discordName     String?
+  discordAvatar   String?
+  enabled         Boolean  @default(true)
+  forwardText     Boolean  @default(true)
+  forwardPhotos   Boolean  @default(true)
+  includeKeywords String?
+  excludeKeywords String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  logs            MessageLog[]
+
+  @@index([tgSourceId])
+}
+
+model MessageLog {
+  id          String    @id @default(cuid())
+  routeId     String
+  route       Route     @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  tgChatId    String
+  tgMessageId String
+  contentText String?
+  hasPhoto    Boolean   @default(false)
+  status      String    @default("PENDING")
+  error       String?
+  attempts    Int       @default(0)
+  tgDate      DateTime
+  forwardedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@unique([routeId, tgChatId, tgMessageId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
+model AppSetting {
+  key   String @id
+  value String
+}

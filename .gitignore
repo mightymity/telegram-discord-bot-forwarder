@@ -1,0 +1,28 @@
+node_modules/
+dist/
+build/
+*.log
+npm-debug.log*
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# database / runtime data
+data/
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+apps/server/prisma/*.db
+apps/server/prisma/migrations/dev/
+
+# telegram session
+*.session
+session.txt
+
+# build tooling
+.vite/
+coverage/
+.DS_Store

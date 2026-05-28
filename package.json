@@ -1,0 +1,29 @@
+{
+  "name": "telegram-discord-forwarder",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,web -c blue,magenta \"npm:dev:server\" \"npm:dev:web\"",
+    "dev:server": "npm --workspace @forwarder/server run dev",
+    "dev:web": "npm --workspace @forwarder/web run dev",
+    "build": "npm --workspace @forwarder/web run build",
+    "start": "npm --workspace @forwarder/server run start",
+    "telegram:login": "npm --workspace @forwarder/server run telegram:login",
+    "prisma:generate": "npm --workspace @forwarder/server run prisma:generate",
+    "prisma:migrate": "npm --workspace @forwarder/server run prisma:migrate",
+    "prisma:deploy": "npm --workspace @forwarder/server run prisma:deploy",
+    "db:seed": "npm --workspace @forwarder/server run db:seed",
+    "test": "npm --workspace @forwarder/server run test"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
