@@ -70,6 +70,7 @@ export type TelegramConnectionState =
   | "connecting"
   | "connected"
   | "no_session"
+  | "session_expired"
   | "error";
 
 export interface TelegramStatus {

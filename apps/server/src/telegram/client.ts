@@ -3,6 +3,7 @@ import { StringSession } from "telegram/sessions";
 import { NewMessage } from "telegram/events";
 import type { NewMessageEvent } from "telegram/events";
 import { LogLevel } from "telegram/extensions/Logger";
+import { isSessionInvalidError } from "./session-errors";
 import { config } from "../config";
 import { bus } from "../events";
 import type {
@@ -15,6 +16,14 @@ let client: TelegramClient | null = null;
 let state: TelegramConnectionState = config.telegramConfigured ? "disconnected" : "no_session";
 let username: string | null = null;
 let lastError: string | null = null;
+let healthTimer: ReturnType<typeof setInterval> | null = null;
+let healthCheckInFlight = false;
+
+// How often to actively probe that the session still works. GramJS handles
+// transient reconnects on its own; this catches the case where the auth key is
+// revoked/expired while running (the transport can look "connected" while every
+// API call 401s).
+const HEALTH_CHECK_INTERVAL_MS = 60_000;
 
 function setState(next: TelegramConnectionState, error: string | null = null): void {
   state = next;
@@ -31,6 +40,43 @@ export function getClient(): TelegramClient | null {
 }
 
 export type NewMessageHandler = (event: NewMessageEvent) => void | Promise<void>;
+
+function stopHealthMonitor(): void {
+  if (healthTimer) {
+    clearInterval(healthTimer);
+    healthTimer = null;
+  }
+}
+
+// A dead auth key (revoked, expired, account logged out / deactivated) can't be
+// recovered by reconnecting, so surface it as `session_expired` and stop the
+// futile retry loop — the operator must re-run `npm run telegram:login`.
+// Transient/network errors are ignored here and left to GramJS autoReconnect.
+async function runHealthCheck(): Promise<void> {
+  const instance = client;
+  if (!instance || healthCheckInFlight) return;
+  healthCheckInFlight = true;
+  try {
+    await instance.getMe();
+    if (state !== "connected") setState("connected"); // recovered from a blip
+  } catch (err) {
+    if (isSessionInvalidError(err)) {
+      stopHealthMonitor();
+      client = null;
+      setState("session_expired", err instanceof Error ? err.message : String(err));
+      await instance.disconnect().catch(() => undefined);
+    }
+  } finally {
+    healthCheckInFlight = false;
+  }
+}
+
+function startHealthMonitor(): void {
+  stopHealthMonitor();
+  healthTimer = setInterval(() => void runHealthCheck(), HEALTH_CHECK_INTERVAL_MS);
+  // Don't keep the process alive solely for the probe.
+  healthTimer.unref?.();
+}
 
 // Connect using the saved StringSession and register the message listener.
 // No-op (state = "no_session") when credentials are not configured, so the
@@ -66,14 +112,18 @@ export async function startTelegram(onMessage: NewMessageHandler): Promise<void>
 
     client = instance;
     setState("connected");
+    startHealthMonitor();
   } catch (err) {
     client = null;
-    setState("error", err instanceof Error ? err.message : String(err));
+    stopHealthMonitor();
+    const message = err instanceof Error ? err.message : String(err);
+    setState(isSessionInvalidError(err) ? "session_expired" : "error", message);
     throw err;
   }
 }
 
 export async function stopTelegram(): Promise<void> {
+  stopHealthMonitor();
   if (!client) return;
   try {
     await client.disconnect();

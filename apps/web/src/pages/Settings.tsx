@@ -37,6 +37,14 @@ export function SettingsPage() {
             <code>TELEGRAM_SESSION</code> (plus API id/hash) in the server environment, then restart.
           </p>
         )}
+        {tg?.state === "session_expired" && (
+          <p className="muted hint">
+            The Telegram session is no longer valid — it was revoked, expired, or the account
+            signed out. Reconnecting can't fix this: run <code>npm run telegram:login</code> again
+            to mint a fresh <code>TELEGRAM_SESSION</code>, update the server environment, then
+            restart.
+          </p>
+        )}
       </div>
 
       <div className="card">

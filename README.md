@@ -110,6 +110,13 @@ login code Telegram sends you, and your 2FA password if you have one. It prints 
 This string grants full access to your Telegram account. **Keep it secret**, never commit
 it, and treat it like a password.
 
+A session can stop working over time — if you terminate it from Telegram's *Active sessions*,
+the account signs it out, you change your 2FA password, the forwarder stays offline past the
+account's "auto-terminate inactive sessions" window, or Telegram revokes it. When that
+happens the dashboard shows **`session_expired`** (the server probes the session periodically
+to detect this). Reconnecting won't help — re-run `npm run telegram:login`, update
+`TELEGRAM_SESSION`, and restart.
+
 ## Environment variables
 
 See [`.env.example`](.env.example) for the full template.

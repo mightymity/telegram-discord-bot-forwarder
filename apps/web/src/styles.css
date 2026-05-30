@@ -206,7 +206,7 @@ input:focus, select:focus { outline: none; border-color: var(--primary); }
 
 .tg-connected { background: rgba(59, 165, 93, 0.15); color: var(--success); border-color: transparent; }
 .tg-connecting { background: rgba(217, 162, 59, 0.15); color: var(--warning); border-color: transparent; }
-.tg-error, .tg-disconnected { background: rgba(237, 66, 69, 0.15); color: var(--danger); border-color: transparent; }
+.tg-error, .tg-disconnected, .tg-session_expired { background: rgba(237, 66, 69, 0.15); color: var(--danger); border-color: transparent; }
 .tg-no_session { background: var(--bg-elev2); color: var(--muted); }
 
 /* Logs table */

@@ -9,6 +9,7 @@ const TG_LABEL: Record<TelegramConnectionState, string> = {
   connecting: "Connecting…",
   disconnected: "Disconnected",
   no_session: "No session",
+  session_expired: "Session expired",
   error: "Error",
 };
 
