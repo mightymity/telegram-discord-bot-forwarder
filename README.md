@@ -14,6 +14,45 @@ delivered to Discord through a rate-limited, retrying send queue.
 > low. The ingestion layer is isolated so you can swap to the Bot API later if you gain
 > admin rights on the source channel.
 
+## ⬇️ Download (desktop app)
+
+No setup required — install, open, and use the dashboard. Telegram is connected
+from a wizard inside the app (no command line, no `.env`).
+
+### **[➡️ Download the latest release](https://github.com/mightymity/telegram-discord-bot-forwarder/releases/latest)**
+
+On the release page, pick the file for your OS:
+
+| OS | File | Notes |
+|----|------|-------|
+| **Windows** | `TG to Discord Forwarder Setup ….exe` | Installer (Start-menu shortcut). The portable `…​.exe` runs without installing. |
+| **macOS (Apple Silicon)** | `TG to Discord Forwarder-…-arm64.dmg` | Open, drag the app into Applications. |
+
+**First launch:** the app shows an auto-generated dashboard **username + password**
+(also saved to `credentials.txt` in the app's data folder). Log in, open
+**Settings**, enter your Telegram API id/hash + phone, type the code Telegram
+sends you, and you're connected.
+
+> The apps are not code-signed yet, so the OS shows a warning the first time:
+> - **Windows:** SmartScreen → *More info* → *Run anyway*.
+> - **macOS:** right-click the app → *Open* → *Open* (or System Settings →
+>   Privacy & Security → *Open Anyway*).
+
+<details>
+<summary>Maintainers: how to publish a downloadable release</summary>
+
+Pushing a version tag builds the Windows installers on CI and attaches them to a
+GitHub Release automatically (see `.github/workflows/desktop-windows.yml`):
+
+```bash
+git tag v0.1.0 && git push origin v0.1.0
+```
+
+macOS `.dmg` is built locally with `npm run desktop:dist:mac` and can be uploaded
+to the same release. See [apps/desktop/README.md](apps/desktop/README.md) for the
+full build details and caveats (Windows binaries must be built on Windows).
+</details>
+
 ## Features
 
 - **Auto-forward** text and photos, Telegram formatting → Discord markdown
