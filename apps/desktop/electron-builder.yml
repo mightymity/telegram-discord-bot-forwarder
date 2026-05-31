@@ -1,0 +1,43 @@
+appId: com.forwarder.desktop
+productName: TG to Discord Forwarder
+# Pinned explicitly because npm workspaces hoist `electron` to the repo-root
+# node_modules, where electron-builder can't auto-detect the version.
+electronVersion: 34.5.8
+directories:
+  output: dist-installers
+  buildResources: resources
+
+# asar is DISABLED on purpose: the server runs as a forked Node child
+# (ELECTRON_RUN_AS_NODE), which does not get Electron's asar fs patching and so
+# cannot read files from inside an asar archive.
+asar: false
+
+# build/ is self-contained (server.cjs + web/ + migrations/). better-sqlite3 is
+# a production dependency and is collected automatically with its native binary.
+files:
+  - build/**
+  - package.json
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
+  icon: resources/icon.ico
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+
+mac:
+  target:
+    - target: dmg
+      arch: [arm64]
+  category: public.app-category.utilities
+  icon: resources/icon.icns
+
+linux:
+  target:
+    - AppImage

@@ -18,7 +18,13 @@
     "prisma:migrate": "npm --workspace @forwarder/server run prisma:migrate",
     "prisma:deploy": "npm --workspace @forwarder/server run prisma:deploy",
     "db:seed": "npm --workspace @forwarder/server run db:seed",
-    "test": "npm --workspace @forwarder/server run test"
+    "test": "npm --workspace @forwarder/server run test",
+    "desktop:build": "npm run prisma:generate && npm run build && npm --workspace @forwarder/desktop run build",
+    "desktop:rebuild-native": "npm --workspace @forwarder/desktop run rebuild-native",
+    "desktop:start": "npm --workspace @forwarder/desktop run start",
+    "desktop:dist": "npm run desktop:build && npm --workspace @forwarder/desktop run dist",
+    "desktop:dist:mac": "npm run desktop:build && npm --workspace @forwarder/desktop run dist:mac",
+    "desktop:dist:win": "npm run desktop:build && npm --workspace @forwarder/desktop run dist:win"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"

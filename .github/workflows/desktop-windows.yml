@@ -1,0 +1,51 @@
+name: Build Windows desktop app
+
+# Run manually from the Actions tab, or automatically when a version tag
+# (e.g. v0.1.0) is pushed — in which case the installers are also attached to a
+# GitHub Release.
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Windows installers
+        # A dummy DATABASE_URL lets `prisma generate` run without a real DB.
+        # better-sqlite3 is rebuilt for Electron's ABI by electron-builder, and
+        # the native binary is compiled here on the Windows runner.
+        env:
+          DATABASE_URL: "file:./build.db"
+        run: npm run desktop:dist:win
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installers
+          path: |
+            apps/desktop/dist-installers/*.exe
+            apps/desktop/dist-installers/*.exe.blockmap
+          if-no-files-found: error
+
+      - name: Attach to release (tag builds only)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            apps/desktop/dist-installers/*.exe

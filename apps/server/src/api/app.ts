@@ -13,8 +13,11 @@ import { telegramRoutes } from "./routes/telegram";
 import { statusRoutes } from "./routes/status";
 import { eventRoutes } from "./routes/events";
 
-// Built dashboard, served by the same process in production (single container).
-const WEB_DIST = path.resolve(__dirname, "..", "..", "..", "web", "dist");
+// Built dashboard, served by the same process in production. The desktop app
+// (bundled server lives elsewhere) injects WEB_DIST_PATH; otherwise fall back
+// to the monorepo-relative location used in dev/Docker.
+const WEB_DIST =
+  process.env.WEB_DIST_PATH ?? path.resolve(__dirname, "..", "..", "..", "web", "dist");
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({

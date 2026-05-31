@@ -1,0 +1,29 @@
+{
+  "name": "@forwarder/desktop",
+  "productName": "TG to Discord Forwarder",
+  "description": "Telegram to Discord forwarder with a built-in dashboard",
+  "author": "Forwarder",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "main": "build/main.js",
+  "scripts": {
+    "build:server": "node scripts/build-server.mjs",
+    "build:main": "node scripts/build-main.mjs",
+    "build": "npm run build:server && npm run build:main",
+    "rebuild-native": "electron-rebuild -f -w better-sqlite3",
+    "start": "electron build/main.js",
+    "dist": "electron-builder --config electron-builder.yml",
+    "dist:mac": "electron-builder --mac --config electron-builder.yml",
+    "dist:win": "electron-builder --win --config electron-builder.yml"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.10.0"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^4.0.1",
+    "electron": "^34.2.0",
+    "electron-builder": "^26.0.12",
+    "esbuild": "^0.24.2"
+  }
+}

@@ -3,7 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import "../lib/load-env";
 
-function sqlitePathFromUrl(databaseUrl: string): string | null {
+export function sqlitePathFromUrl(databaseUrl: string): string | null {
   if (!databaseUrl.startsWith("file:")) return null;
 
   if (databaseUrl.startsWith("file://")) {

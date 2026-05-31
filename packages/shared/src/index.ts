@@ -79,6 +79,31 @@ export interface TelegramStatus {
   error: string | null;
 }
 
+// --- Interactive login wizard (dashboard) ---
+
+export interface TelegramLoginStartInput {
+  apiId: number;
+  apiHash: string;
+  phone: string;
+}
+
+export interface TelegramLoginStartResult {
+  state: string;
+  codeSent: true;
+}
+
+export interface TelegramLoginVerifyInput {
+  state: string;
+  code: string;
+  password?: string;
+}
+
+export type TelegramLoginVerifyResult =
+  // 2FA is enabled on the account; re-submit with `password`.
+  | { needsPassword: true }
+  // Login complete; the live client has been (re)connected.
+  | { status: TelegramStatus };
+
 export interface StatusSummary {
   routes: { total: number; enabled: number };
   messages: { today: number; sentToday: number; failedToday: number; pending: number };

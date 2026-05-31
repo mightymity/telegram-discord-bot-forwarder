@@ -164,6 +164,11 @@ input:focus, select:focus { outline: none; border-color: var(--primary); }
 .login-sub { text-align: center; margin: 0 0 1.25rem; }
 .login-card .btn { width: 100%; justify-content: center; margin-top: 0.5rem; }
 
+/* Telegram login wizard */
+.tg-wizard { margin-top: 1rem; max-width: 420px; }
+.tg-wizard .hint { margin-bottom: 1rem; }
+.tg-wizard-actions { display: flex; gap: 0.6rem; margin-top: 1rem; }
+
 /* Routes */
 .route-list { display: flex; flex-direction: column; gap: 0.75rem; }
 .route-item { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }

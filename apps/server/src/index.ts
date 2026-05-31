@@ -1,5 +1,7 @@
 import { config } from "./config";
 import { disconnectPrisma } from "./db/prisma";
+import { ensureSqliteDatabaseFile } from "./db/ensure-sqlite";
+import { applyMigrations } from "./db/migrate";
 import { ensureAdminUser } from "./auth";
 import { buildApp } from "./api/app";
 import { startTelegram, stopTelegram } from "./telegram/client";
@@ -7,6 +9,12 @@ import { handleNewMessage } from "./telegram/listener";
 import { requeuePending } from "./forwarder/queue";
 
 async function main(): Promise<void> {
+  // Ensure the SQLite file exists and the schema is migrated before any query.
+  // In dev this is a no-op (prisma migrate already ran); in the packaged desktop
+  // app this is what creates the schema on a fresh user database.
+  ensureSqliteDatabaseFile();
+  applyMigrations();
+
   await ensureAdminUser();
 
   const requeued = await requeuePending();

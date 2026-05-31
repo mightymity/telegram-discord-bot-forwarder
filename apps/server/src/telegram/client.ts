@@ -4,7 +4,7 @@ import { NewMessage } from "telegram/events";
 import type { NewMessageEvent } from "telegram/events";
 import { LogLevel } from "telegram/extensions/Logger";
 import { isSessionInvalidError } from "./session-errors";
-import { config } from "../config";
+import { getTelegramCreds } from "./credentials-store";
 import { bus } from "../events";
 import type {
   TelegramConnectionState,
@@ -13,8 +13,11 @@ import type {
 } from "@forwarder/shared";
 
 let client: TelegramClient | null = null;
-let state: TelegramConnectionState = config.telegramConfigured ? "disconnected" : "no_session";
+let state: TelegramConnectionState = "disconnected";
 let username: string | null = null;
+// Remembered so the login wizard can hot-restart the client after saving a new
+// session without the caller re-plumbing the message handler.
+let messageHandler: NewMessageHandler | null = null;
 let lastError: string | null = null;
 let healthTimer: ReturnType<typeof setInterval> | null = null;
 let healthCheckInFlight = false;
@@ -82,7 +85,9 @@ function startHealthMonitor(): void {
 // No-op (state = "no_session") when credentials are not configured, so the
 // rest of the app (API + dashboard) still boots.
 export async function startTelegram(onMessage: NewMessageHandler): Promise<void> {
-  if (!config.telegramConfigured) {
+  messageHandler = onMessage;
+  const creds = await getTelegramCreds();
+  if (!creds) {
     setState("no_session");
     return;
   }
@@ -90,13 +95,12 @@ export async function startTelegram(onMessage: NewMessageHandler): Promise<void>
 
   setState("connecting");
   try {
-    const session = new StringSession(config.TELEGRAM_SESSION ?? "");
-    const instance = new TelegramClient(
-      session,
-      config.TELEGRAM_API_ID!,
-      config.TELEGRAM_API_HASH!,
-      { connectionRetries: 5, autoReconnect: true, retryDelay: 2000 },
-    );
+    const session = new StringSession(creds.session);
+    const instance = new TelegramClient(session, creds.apiId, creds.apiHash, {
+      connectionRetries: 5,
+      autoReconnect: true,
+      retryDelay: 2000,
+    });
     instance.setLogLevel(LogLevel.WARN);
 
     await instance.connect();
@@ -131,6 +135,15 @@ export async function stopTelegram(): Promise<void> {
     client = null;
     setState("disconnected");
   }
+}
+
+// Tear down the current connection and reconnect using the latest stored
+// credentials. Used by the login wizard after it saves a fresh session.
+export async function restartTelegram(): Promise<void> {
+  const onMessage = messageHandler;
+  if (!onMessage) throw new Error("Telegram client was never started");
+  await stopTelegram();
+  await startTelegram(onMessage);
 }
 
 // List the account's chats so the dashboard can pick a source.

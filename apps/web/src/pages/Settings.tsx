@@ -1,8 +1,15 @@
 import { useTelegramStatus } from "../api/status";
+import { useTelegramLogout } from "../api/telegram";
 import { TelegramBadge } from "../components/StatusBadge";
+import { TelegramLoginWizard } from "../components/TelegramLoginWizard";
 
 export function SettingsPage() {
   const { data: tg, isLoading } = useTelegramStatus();
+  const logout = useTelegramLogout();
+
+  // Show the connect wizard whenever there's no usable session.
+  const needsLogin =
+    tg?.state === "no_session" || tg?.state === "session_expired" || tg?.state === "error";
 
   return (
     <div className="page">
@@ -31,19 +38,27 @@ export function SettingsPage() {
             )}
           </div>
         )}
-        {tg?.state === "no_session" && (
-          <p className="muted hint">
-            No Telegram session configured. Run <code>npm run telegram:login</code> and set{" "}
-            <code>TELEGRAM_SESSION</code> (plus API id/hash) in the server environment, then restart.
-          </p>
-        )}
+
         {tg?.state === "session_expired" && (
           <p className="muted hint">
             The Telegram session is no longer valid — it was revoked, expired, or the account
-            signed out. Reconnecting can't fix this: run <code>npm run telegram:login</code> again
-            to mint a fresh <code>TELEGRAM_SESSION</code>, update the server environment, then
-            restart.
+            signed out. Connect again below to mint a fresh session.
           </p>
+        )}
+
+        {needsLogin && <TelegramLoginWizard />}
+
+        {tg?.state === "connected" && (
+          <div className="tg-wizard-actions">
+            <button
+              className="btn"
+              type="button"
+              onClick={() => logout.mutate()}
+              disabled={logout.isPending}
+            >
+              {logout.isPending ? "Logging out…" : "Log out"}
+            </button>
+          </div>
         )}
       </div>
 
