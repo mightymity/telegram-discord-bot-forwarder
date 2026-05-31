@@ -12,6 +12,9 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
+    # Needed so the release step can create/update a GitHub Release on tag builds.
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
